@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import random
+import psycopg2
 
 #https://www.avito.ru/perm/kvartiry/prodam/3-komnatnye/novostroyka-ASgBAQICAUSSA8YQAkDmBxSOUsoIFIRZ?cd=1&f=ASgBAQECAUSSA8YQAkDmBxSOUsoIFIRZBUXgBxd7ImZyb20iOjUxMzAsInRvIjpudWxsfeIHF3siZnJvbSI6NTE5MiwidG8iOm51bGx9hAkUeyJmcm9tIjo2MCwidG8iOjEwMH2MLhV7ImZyb20iOjExLCJ0byI6bnVsbH2QLhV7ImZyb20iOjExLCJ0byI6bnVsbH0
 URL = 'https://www.avito.ru/perm/kvartiry/prodam/3-komnatnye/novostroyka-ASgBAQICAUSSA8YQAkDmBxSOUsoIFIRZ'
@@ -90,8 +91,9 @@ def parse():
     # print(f'Парсим страницу {p} из {pages}.')
 
     save_file(ads, FILE)
+    save_sql(ads)
 
-    get_detail(ads)
+    # get_detail(ads)
 
 
 
@@ -103,6 +105,19 @@ def save_file(items, path):
             writer.writerow([item['title'],item['href'],item['price'],item['adress']])
             # writer.writerow([item['title'],item['href'],item['price'],item['adress']])
 
+
+
+def save_sql(items):
+    conn = psycopg2.connect('postgres://postgres:2126829740@localhost:5432/parserdata')
+    with conn.cursor() as cursor:
+        conn.autocommit = True
+        insert  = sql.
+
+    # https: // khashtamov.com / ru / postgresql - python - psycopg2 /
+
+    cursor.execute('''SELECT * FROM appartments''')
+    records = cursor.fetchall()
+    print(records)
 
 
 parse()
