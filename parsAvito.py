@@ -12,22 +12,18 @@ HOST = 'https://www.avito.ru'
 FILE = 'ThreeRoom.csv'
 
 
-
 def get_html(url, params=None):
     r = requests.get(url, headers=HEADERS, params=params)
-
     if r.status_code == 200:
         return r.text
     else:
         print('Error get_html')
 
 
-
 def get_page():
     with open('G:\Python\parsAvito\page2.html',encoding='utf-8') as f:
         r = f.read()
         return r
-
 
 
 def get_content(html):
@@ -42,8 +38,8 @@ def get_content(html):
         price = int(price)
         adress = item.find('span', class_='item-address__string').get_text(strip=True)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # now = datetime.now()
-
+        list = [title,href,price,adress,now]
+        ads.append(list)
 
         #
         # ads.append({
@@ -53,27 +49,7 @@ def get_content(html):
         #     'adress': adress,
         # })
 
-
-        list = [title,href,price,adress,now]
-        ads.append(list)
-
-
-
     return ads
-
-def get_detail(items):
-    for item in items:
-        # url_detail = item['href']
-        url_detail = 'https://www.avito.ru/perm/kvartiry/3-k_kvartira_68.3_m_1417_et._1920784941'
-        get_content_detail(url_detail)
-
-
-
-def get_content_detail(url):
-    text = get_html(url)
-    soup = BeautifulSoup(text, 'html.parser')
-    date = item.find('div', class_='title-info-metadata-item-redesign')
-
 
 
 def get_pages(html):
@@ -85,6 +61,26 @@ def get_pages(html):
     else:
         return 1
 
+
+def save_file(items, path):
+    with open(path,'w',newline='',encoding='utf-8') as file:
+        writer = csv.writer(file, delimiter = ';')
+        writer.writerow(items[0])
+        for item in items:
+            writer.writerow([item['title'],item['href'],item['price'],item['adress']])
+            # writer.writerow([item['title'],item['href'],item['price'],item['adress']])
+
+
+def save_sql(items):
+    conn = psycopg2.connect('postgres://postgres:2126829740@localhost:5432/parserdata')
+    cursor=conn.cursor()
+    for item in items:
+        query = item[0],item[1],item[2],item[3],item[4]
+        query = str(query)
+        cursor.execute("INSERT INTO appartments(title,href,price,adress,time) VALUES "+query,)
+
+    conn.commit()
+    conn.close()
 
 
 def parse():
@@ -99,38 +95,9 @@ def parse():
         print(f'Парсим страницу {p} из {pages}.')
     text = get_html(URL,params={'p':p})
     ads.extend(get_content(text,))
-    print(f'Парсим страницу {p} из {pages}.')
 
     # save_file(ads, FILE)
     save_sql(ads)
-
-    # get_detail(ads)
-
-
-
-def save_file(items, path):
-    with open(path,'w',newline='',encoding='utf-8') as file:
-        writer = csv.writer(file, delimiter = ';')
-        writer.writerow(items[0])
-        for item in items:
-            writer.writerow([item['title'],item['href'],item['price'],item['adress']])
-            # writer.writerow([item['title'],item['href'],item['price'],item['adress']])
-
-
-
-def save_sql(items):
-    conn = psycopg2.connect('postgres://postgres:2126829740@localhost:5432/parserdata')
-    cursor=conn.cursor()
-
-    for item in items:
-
-        query = item[0],item[1],item[2],item[3],item[4]
-        query = str(query)
-        cursor.execute("INSERT INTO appartments(title,href,price,adress,time) VALUES "+query,)
-
-
-    conn.commit()
-    conn.close()
 
 
 
